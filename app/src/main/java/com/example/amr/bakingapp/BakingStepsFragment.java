@@ -83,9 +83,10 @@ public class BakingStepsFragment extends Fragment {
                     public void onItemClick(View view, int position) {
                         String VideoURL = bakingResponse.getSteps().get(position).getVideoURL();
                         String Description = bakingResponse.getSteps().get(position).getDescription();
+                        String thumbnailURL = bakingResponse.getSteps().get(position).getThumbnailURL();
                         String stepsBean = gson2.toJson(bakingResponse.getSteps());
                         int stepsBeanSize = bakingResponse.getSteps().size();
-                        mListener.setSelectedBaking(VideoURL, Description, stepsBean, position, stepsBeanSize);
+                        mListener.setSelectedBaking(VideoURL, Description, thumbnailURL, stepsBean, position, stepsBeanSize);
                     }
 
                     @Override

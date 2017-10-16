@@ -4,14 +4,12 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.amr.bakingapp.Adapters.MainAdapter;
@@ -61,7 +59,36 @@ public class MainActivity extends AppCompatActivity {
         pdialog.setCancelable(false);
         pdialog.setMessage("Loading. Please wait...");
 
-        getBakingGET();
+        if (savedInstanceState != null) {
+            BakingData = savedInstanceState.getString("BakingData");
+            Type type = new TypeToken<List<BakingResponse>>() {
+            }.getType();
+            bakingResponses = gson.fromJson(BakingData, type);
+
+            adapter = new MainAdapter(MainActivity.this, bakingResponses);
+            RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(MainActivity.this, noItems);
+            recycler_view.setLayoutManager(mLayoutManager);
+            recycler_view.setItemAnimator(new DefaultItemAnimator());
+            recycler_view.setAdapter(adapter);
+
+            recycler_view.addOnItemTouchListener(
+                    new RecyclerItemClickListener(MainActivity.this, recycler_view, new RecyclerItemClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            Intent i = new Intent(MainActivity.this, BakingStepsActivity.class);
+                            i.putExtra("bakingIndex", position);
+                            startActivity(i);
+                        }
+
+                        @Override
+                        public void onLongItemClick(View view, int position) {
+                            // do whatever
+                        }
+                    })
+            );
+        } else {
+            getBakingGET();
+        }
     }
 
     public void getBakingGET() {
@@ -143,9 +170,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("BakingData", BakingData);
     }
 }

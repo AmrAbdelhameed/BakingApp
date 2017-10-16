@@ -13,8 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize|screenLayout|uiMode">
+            android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -22,8 +21,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".BakingStepsActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize|screenLayout|uiMode" />
+            android:name=".BakingStepsActivity" />
         <activity android:name=".BakingStepDetailsActivity" />
 
         <receiver android:name=".NewAppWidget">
@@ -37,8 +35,7 @@
         </receiver>
 
         <activity
-            android:name=".NewAppWidgetConfigureActivity"
-            android:configChanges="orientation|keyboard|keyboardHidden|screenSize|screenLayout|uiMode">
+            android:name=".NewAppWidgetConfigureActivity">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>

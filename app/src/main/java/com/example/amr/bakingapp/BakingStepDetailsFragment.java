@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.exoplayer2.ExoPlayerFactory;
@@ -24,14 +25,16 @@ import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Util;
+import com.squareup.picasso.Picasso;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class BakingStepDetailsFragment extends Fragment {
 
-    String videoURL, Description;
+    String videoURL, Description, thumbnailURL;
     TextView textDescription;
+    ImageView thumbnailURLImageView;
     private SimpleExoPlayerView simpleExoPlayerView;
     private SimpleExoPlayer player;
     private Timeline.Window window;
@@ -51,11 +54,16 @@ public class BakingStepDetailsFragment extends Fragment {
 
         simpleExoPlayerView = (SimpleExoPlayerView) v.findViewById(R.id.player_view);
         textDescription = (TextView) v.findViewById(R.id.textDescription);
+        thumbnailURLImageView = (ImageView) v.findViewById(R.id.thumbnailURLImageView);
 
         Bundle sentBundle = getArguments();
 
         videoURL = sentBundle.getString("videoURL");
         Description = sentBundle.getString("Description");
+        thumbnailURL = sentBundle.getString("thumbnailURL");
+
+        if (!thumbnailURL.isEmpty())
+            Picasso.with(getActivity()).load(thumbnailURL).into(thumbnailURLImageView);
 
         textDescription.append("\n" + Description);
         shouldAutoPlay = true;

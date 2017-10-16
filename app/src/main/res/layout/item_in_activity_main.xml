@@ -15,7 +15,7 @@
             android:layout_height="wrap_content">
 
             <ImageView
-                android:id="@+id/person_photo"
+                android:id="@+id/image"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_marginLeft="0dp"
@@ -36,9 +36,9 @@
                 android:text="Nutella"
                 android:textSize="18sp"
                 android:textColor="#000000"
-                app:layout_constraintLeft_toLeftOf="@+id/person_photo"
-                app:layout_constraintRight_toRightOf="@+id/person_photo"
-                app:layout_constraintTop_toBottomOf="@+id/person_photo" />
+                app:layout_constraintLeft_toLeftOf="@+id/image"
+                app:layout_constraintRight_toRightOf="@+id/image"
+                app:layout_constraintTop_toBottomOf="@+id/image" />
 
             <TextView
                 android:id="@+id/servings"

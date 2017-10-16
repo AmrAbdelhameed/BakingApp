@@ -115,6 +115,8 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
         Bundle sentBundle2 = new Bundle();
         sentBundle2.putString("videoURL", stepsBeen.get(pos).getVideoURL());
         sentBundle2.putString("Description", stepsBeen.get(pos).getDescription());
+        sentBundle2.putString("thumbnailURL", stepsBeen.get(pos).getThumbnailURL());
+
         mDetailsFragment.setArguments(sentBundle2);
         getSupportFragmentManager().beginTransaction().replace(R.id.flDetails, mDetailsFragment, "").commit();
         CheckVisibility_Next_Previous(pos);

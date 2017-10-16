@@ -35,12 +35,13 @@ public class BakingStepsActivity extends AppCompatActivity implements TabletMood
     }
 
     @Override
-    public void setSelectedBaking(String videoURL, String Description, String stepsBean, int position, int stepsBeanSize) {
+    public void setSelectedBaking(String videoURL, String Description, String thumbnailURL, String stepsBean, int position, int stepsBeanSize) {
 
         if (!mIsTwoPane) {
             Intent i = new Intent(this, BakingStepDetailsActivity.class);
             i.putExtra("videoURL", videoURL);
             i.putExtra("Description", Description);
+            i.putExtra("thumbnailURL", thumbnailURL);
             i.putExtra("stepsBean", stepsBean);
             i.putExtra("position", position);
             i.putExtra("stepsBeanSize", stepsBeanSize);
@@ -50,19 +51,13 @@ public class BakingStepsActivity extends AppCompatActivity implements TabletMood
             Bundle extras = new Bundle();
             extras.putString("videoURL", videoURL);
             extras.putString("Description", Description);
+            extras.putString("thumbnailURL", thumbnailURL);
             extras.putString("stepsBean", stepsBean);
             extras.putInt("position", position);
             extras.putInt("stepsBeanSize", stepsBeanSize);
             mDetailsFragment.setArguments(extras);
             getSupportFragmentManager().beginTransaction().replace(R.id.flDetails, mDetailsFragment, "").commit();
         }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
     }
 
     @Override

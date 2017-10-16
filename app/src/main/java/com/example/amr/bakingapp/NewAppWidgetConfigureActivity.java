@@ -102,7 +102,48 @@ public class NewAppWidgetConfigureActivity extends Activity {
         pdialog.setCancelable(false);
         pdialog.setMessage("Loading. Please wait...");
 
-        getBakingGET();
+        if (icicle != null) {
+            BakingData = icicle.getString("BakingData");
+            Type type = new TypeToken<List<BakingResponse>>() {
+            }.getType();
+            bakingResponses = gson.fromJson(BakingData, type);
+
+            adapter = new MainAdapter(NewAppWidgetConfigureActivity.this, bakingResponses);
+            RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(NewAppWidgetConfigureActivity.this, noItems);
+            recycler_view.setLayoutManager(mLayoutManager);
+            recycler_view.setItemAnimator(new DefaultItemAnimator());
+            recycler_view.setAdapter(adapter);
+
+            recycler_view.addOnItemTouchListener(
+                    new RecyclerItemClickListener(NewAppWidgetConfigureActivity.this, recycler_view, new RecyclerItemClickListener.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(View view, int position) {
+                            String widgetText = "Ingredients: \n";
+                            // When the button is clicked, store the string locally
+                            for (int index = 0; index < bakingResponses.get(position).getIngredients().size(); index++)
+                                widgetText += bakingResponses.get(position).getIngredients().get(index).getIngredient() + " : " + bakingResponses.get(position).getIngredients().get(index).getQuantity() + " " + bakingResponses.get(position).getIngredients().get(index).getMeasure() + "\n";
+                            saveTitlePref(NewAppWidgetConfigureActivity.this, mAppWidgetId, widgetText);
+
+                            // It is the responsibility of the configuration activity to update the app widget
+                            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(NewAppWidgetConfigureActivity.this);
+                            NewAppWidget.updateAppWidget(NewAppWidgetConfigureActivity.this, appWidgetManager, mAppWidgetId);
+
+                            // Make sure we pass back the original appWidgetId
+                            Intent resultValue = new Intent();
+                            resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
+                            setResult(RESULT_OK, resultValue);
+                            finish();
+                        }
+
+                        @Override
+                        public void onLongItemClick(View view, int position) {
+                            // do whatever
+                        }
+                    })
+            );
+        } else {
+            getBakingGET();
+        }
 
         // Find the widget id from the intent.
         Intent intent = getIntent();
@@ -221,12 +262,10 @@ public class NewAppWidgetConfigureActivity extends Activity {
             }
         });
     }
-
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("BakingData", BakingData);
     }
 }
 

@@ -5,10 +5,12 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.amr.bakingapp.Models.BakingResponse;
 import com.example.amr.bakingapp.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -40,6 +42,10 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MyViewHolder> 
         BakingResponse bakingResponse = bakingResponses.get(position);
         holder.name.setText(bakingResponse.getName());
         holder.servings.setText(String.valueOf(bakingResponse.getServings()) + " servings");
+
+        String imag = bakingResponse.getImage();
+        if (!imag.isEmpty())
+            Picasso.with(mContext).load(imag).into(holder.image);
     }
 
     @Override
@@ -49,11 +55,13 @@ public class MainAdapter extends RecyclerView.Adapter<MainAdapter.MyViewHolder> 
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView name, servings;
+        public ImageView image;
 
         public MyViewHolder(View view) {
             super(view);
             name = (TextView) view.findViewById(R.id.name);
             servings = (TextView) view.findViewById(R.id.servings);
+            image = (ImageView) view.findViewById(R.id.image);
         }
     }
 }
