@@ -72,14 +72,15 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<List<BakingResponse>> call, Response<List<BakingResponse>> response) {
 
                 if (response.isSuccessful()) {
+                    bakingResponses = response.body();
 
-                    BakingData = gson.toJson(response.body());
+                    BakingData = gson.toJson(bakingResponses);
                     SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("sharedPreferences_name", Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putString("BakingData", BakingData);
                     editor.apply();
 
-                    adapter = new MainAdapter(MainActivity.this, response.body());
+                    adapter = new MainAdapter(MainActivity.this, bakingResponses);
                     RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(MainActivity.this, noItems);
                     recycler_view.setLayoutManager(mLayoutManager);
                     recycler_view.setItemAnimator(new DefaultItemAnimator());
