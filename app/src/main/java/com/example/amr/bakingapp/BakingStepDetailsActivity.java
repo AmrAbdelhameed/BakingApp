@@ -43,8 +43,10 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
     private Timeline.Window window;
     private DataSource.Factory mediaDataSourceFactory;
     private DefaultTrackSelector trackSelector;
-    private boolean shouldAutoPlay;
     private BandwidthMeter bandwidthMeter;
+    private boolean shouldAutoPlay;
+    private int currentWindow;
+    private long playbackPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,10 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
             videoURL = savedInstanceState.getString("videoURL");
             stepsBean = savedInstanceState.getString("stepsBean");
             stepsBeanSize = savedInstanceState.getInt("stepsBeanSize");
+
+            shouldAutoPlay = savedInstanceState.getBoolean("shouldAutoPlay");
+            currentWindow = savedInstanceState.getInt("currentWindow");
+            playbackPosition = savedInstanceState.getLong("playbackPosition");
         } else {
             position = sentBundle.getInt("position");
             videoURL = sentBundle.getString("videoURL");
@@ -105,13 +111,22 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
     public void UpdateFragment(int pos) {
         BakingStepDetailsFragment mDetailsFragment = new BakingStepDetailsFragment();
 
-        Bundle sentBundle2 = new Bundle();
-        sentBundle2.putString("videoURL", stepsBeen.get(pos).getVideoURL());
-        sentBundle2.putString("Description", stepsBeen.get(pos).getDescription());
-        sentBundle2.putString("thumbnailURL", stepsBeen.get(pos).getThumbnailURL());
-        mDetailsFragment.setArguments(sentBundle2);
+        Bundle sentBundle = new Bundle();
+        sentBundle.putString("videoURL", stepsBeen.get(pos).getVideoURL());
+        sentBundle.putString("Description", stepsBeen.get(pos).getDescription());
+        sentBundle.putString("thumbnailURL", stepsBeen.get(pos).getThumbnailURL());
+
+        sentBundle.putBoolean("shouldAutoPlay", shouldAutoPlay);
+        sentBundle.putInt("currentWindow", currentWindow);
+        sentBundle.putLong("playbackPosition", playbackPosition);
+
+        mDetailsFragment.setArguments(sentBundle);
 
         getSupportFragmentManager().beginTransaction().replace(R.id.flDetails, mDetailsFragment, "").commit();
+
+        shouldAutoPlay = !shouldAutoPlay;
+        currentWindow = 0;
+        playbackPosition = 0;
 
         CheckVisibility_Next_Previous(pos);
     }
@@ -149,19 +164,22 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
             simpleExoPlayerView.setPlayer(player);
 
             player.setPlayWhenReady(shouldAutoPlay);
+            player.seekTo(currentWindow, playbackPosition);
 
             DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
             MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(videoURL),
                     mediaDataSourceFactory, extractorsFactory, null, null);
 
-            player.prepare(mediaSource);
+            player.prepare(mediaSource, true, false);
         }
     }
 
     private void releasePlayer() {
         if (landscapeMood) {
             if (player != null) {
+                playbackPosition = player.getCurrentPosition();
+                currentWindow = player.getCurrentWindowIndex();
                 shouldAutoPlay = player.getPlayWhenReady();
                 player.release();
                 player = null;
@@ -217,5 +235,9 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
         outState.putString("thumbnailURL", stepsBeen.get(position).getThumbnailURL());
         outState.putString("stepsBean", stepsBean);
         outState.putInt("stepsBeanSize", stepsBeanSize);
+
+        outState.putBoolean("shouldAutoPlay", shouldAutoPlay);
+        outState.putInt("currentWindow", currentWindow);
+        outState.putLong("playbackPosition", playbackPosition);
     }
 }

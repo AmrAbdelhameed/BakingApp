@@ -2,6 +2,7 @@ package com.example.amr.bakingapp;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,7 +41,9 @@ public class BakingStepDetailsFragment extends Fragment {
     private Timeline.Window window;
     private DataSource.Factory mediaDataSourceFactory;
     private DefaultTrackSelector trackSelector;
-    private boolean shouldAutoPlay;
+    private boolean shouldAutoPlay, check = false;
+    private int currentWindow;
+    private long playbackPosition;
     private BandwidthMeter bandwidthMeter;
 
     public BakingStepDetailsFragment() {
@@ -61,6 +64,16 @@ public class BakingStepDetailsFragment extends Fragment {
         videoURL = sentBundle.getString("videoURL");
         Description = sentBundle.getString("Description");
         thumbnailURL = sentBundle.getString("thumbnailURL");
+
+        shouldAutoPlay = sentBundle.getBoolean("shouldAutoPlay");
+        currentWindow = sentBundle.getInt("currentWindow");
+        playbackPosition = sentBundle.getLong("playbackPosition");
+
+        if (savedInstanceState != null) {
+            shouldAutoPlay = savedInstanceState.getBoolean("shouldAutoPlay");
+            currentWindow = savedInstanceState.getInt("currentWindow");
+            playbackPosition = savedInstanceState.getLong("playbackPosition");
+        }
 
         if (!thumbnailURL.isEmpty())
             Picasso.with(getActivity()).load(thumbnailURL).into(thumbnailURLImageView);
@@ -88,17 +101,20 @@ public class BakingStepDetailsFragment extends Fragment {
         simpleExoPlayerView.setPlayer(player);
 
         player.setPlayWhenReady(shouldAutoPlay);
+        player.seekTo(currentWindow, playbackPosition);
 
         DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
 
         MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(videoURL),
                 mediaDataSourceFactory, extractorsFactory, null, null);
 
-        player.prepare(mediaSource);
+        player.prepare(mediaSource, true, false);
     }
 
     private void releasePlayer() {
         if (player != null) {
+            playbackPosition = player.getCurrentPosition();
+            currentWindow = player.getCurrentWindowIndex();
             shouldAutoPlay = player.getPlayWhenReady();
             player.release();
             player = null;
@@ -136,5 +152,18 @@ public class BakingStepDetailsFragment extends Fragment {
         if (Util.SDK_INT > 23) {
             releasePlayer();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("shouldAutoPlay", shouldAutoPlay);
+        outState.putInt("currentWindow", currentWindow);
+        outState.putLong("playbackPosition", playbackPosition);
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
     }
 }
