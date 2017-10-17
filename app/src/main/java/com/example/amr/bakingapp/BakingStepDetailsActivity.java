@@ -34,7 +34,7 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
 
     int position, stepsBeanSize;
     String videoURL, stepsBean;
-    boolean landscapeMood, tabletMood;
+    boolean landscapeMood;
     Button buttonNext, buttonPrevious;
     Gson gson;
     List<BakingResponse.StepsBean> stepsBeen;
@@ -55,42 +55,34 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
+        buttonNext = (Button) findViewById(R.id.buttonNext);
+        buttonPrevious = (Button) findViewById(R.id.buttonPrevious);
+
+        landscapeMood = getResources().getBoolean(R.bool.landscapeMood);
+
         Intent sentIntent = getIntent();
         Bundle sentBundle = sentIntent.getExtras();
 
         if (savedInstanceState != null) {
             position = savedInstanceState.getInt("position");
             videoURL = savedInstanceState.getString("videoURL");
+            stepsBean = savedInstanceState.getString("stepsBean");
+            stepsBeanSize = savedInstanceState.getInt("stepsBeanSize");
         } else {
             position = sentBundle.getInt("position");
             videoURL = sentBundle.getString("videoURL");
+            stepsBean = sentBundle.getString("stepsBean");
+            stepsBeanSize = sentBundle.getInt("stepsBeanSize");
         }
-
-        stepsBean = sentBundle.getString("stepsBean");
-        stepsBeanSize = sentBundle.getInt("stepsBeanSize");
 
         gson = new Gson();
         Type type = new TypeToken<List<BakingResponse.StepsBean>>() {
         }.getType();
         stepsBeen = gson.fromJson(stepsBean, type);
 
-        landscapeMood = getResources().getBoolean(R.bool.landscapeMood);
-        tabletMood = getResources().getBoolean(R.bool.tabletMood);
+        if (!landscapeMood) {
 
-        if (landscapeMood && !tabletMood) {
-            shouldAutoPlay = true;
-            bandwidthMeter = new DefaultBandwidthMeter();
-            mediaDataSourceFactory = new DefaultDataSourceFactory(BakingStepDetailsActivity.this, Util.getUserAgent(BakingStepDetailsActivity.this, "mediaPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
-            window = new Timeline.Window();
-        } else {
-            if (savedInstanceState == null) {
-                BakingStepDetailsFragment mDetailsFragment = new BakingStepDetailsFragment();
-                mDetailsFragment.setArguments(sentBundle);
-                getSupportFragmentManager().beginTransaction().replace(R.id.flDetails, mDetailsFragment, "").commit();
-            }
-            buttonNext = (Button) findViewById(R.id.buttonNext);
-            buttonPrevious = (Button) findViewById(R.id.buttonPrevious);
-            CheckVisibility_Next_Previous(position);
+            UpdateFragment(position);
 
             buttonNext.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -112,13 +104,15 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
 
     public void UpdateFragment(int pos) {
         BakingStepDetailsFragment mDetailsFragment = new BakingStepDetailsFragment();
+
         Bundle sentBundle2 = new Bundle();
         sentBundle2.putString("videoURL", stepsBeen.get(pos).getVideoURL());
         sentBundle2.putString("Description", stepsBeen.get(pos).getDescription());
         sentBundle2.putString("thumbnailURL", stepsBeen.get(pos).getThumbnailURL());
-
         mDetailsFragment.setArguments(sentBundle2);
+
         getSupportFragmentManager().beginTransaction().replace(R.id.flDetails, mDetailsFragment, "").commit();
+
         CheckVisibility_Next_Previous(pos);
     }
 
@@ -134,35 +128,45 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
     }
 
     private void initializePlayer() {
-        simpleExoPlayerView = (SimpleExoPlayerView) findViewById(R.id.player_view);
 
-        simpleExoPlayerView.requestFocus();
+        if (landscapeMood) {
+            simpleExoPlayerView = (SimpleExoPlayerView) findViewById(R.id.player_view);
 
-        TrackSelection.Factory videoTrackSelectionFactory =
-                new AdaptiveTrackSelection.Factory(bandwidthMeter);
+            shouldAutoPlay = true;
+            bandwidthMeter = new DefaultBandwidthMeter();
+            mediaDataSourceFactory = new DefaultDataSourceFactory(BakingStepDetailsActivity.this, Util.getUserAgent(BakingStepDetailsActivity.this, "mediaPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
+            window = new Timeline.Window();
 
-        trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
+            simpleExoPlayerView.requestFocus();
 
-        player = ExoPlayerFactory.newSimpleInstance(BakingStepDetailsActivity.this, trackSelector);
+            TrackSelection.Factory videoTrackSelectionFactory =
+                    new AdaptiveTrackSelection.Factory(bandwidthMeter);
 
-        simpleExoPlayerView.setPlayer(player);
+            trackSelector = new DefaultTrackSelector(videoTrackSelectionFactory);
 
-        player.setPlayWhenReady(shouldAutoPlay);
+            player = ExoPlayerFactory.newSimpleInstance(BakingStepDetailsActivity.this, trackSelector);
 
-        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+            simpleExoPlayerView.setPlayer(player);
 
-        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(videoURL),
-                mediaDataSourceFactory, extractorsFactory, null, null);
+            player.setPlayWhenReady(shouldAutoPlay);
 
-        player.prepare(mediaSource);
+            DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+            MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(videoURL),
+                    mediaDataSourceFactory, extractorsFactory, null, null);
+
+            player.prepare(mediaSource);
+        }
     }
 
     private void releasePlayer() {
-        if (player != null) {
-            shouldAutoPlay = player.getPlayWhenReady();
-            player.release();
-            player = null;
-            trackSelector = null;
+        if (landscapeMood) {
+            if (player != null) {
+                shouldAutoPlay = player.getPlayWhenReady();
+                player.release();
+                player = null;
+                trackSelector = null;
+            }
         }
     }
 
@@ -209,5 +213,9 @@ public class BakingStepDetailsActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         outState.putInt("position", position);
         outState.putString("videoURL", stepsBeen.get(position).getVideoURL());
+        outState.putString("Description", stepsBeen.get(position).getDescription());
+        outState.putString("thumbnailURL", stepsBeen.get(position).getThumbnailURL());
+        outState.putString("stepsBean", stepsBean);
+        outState.putInt("stepsBeanSize", stepsBeanSize);
     }
 }
